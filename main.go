@@ -5,6 +5,7 @@ import (
 	"github.com/kristenfelch/pkgindexer/input"
 	"github.com/kristenfelch/pkgindexer/operation"
 	"strings"
+	"flag"
 )
 
 // IndexService is responsible for opening a Message Gateway and giving it a Channel
@@ -72,13 +73,15 @@ func (s *SimpleIndexService) ProcessMessage(input *input.ValidatedMessage) {
 }
 
 func main() {
+	throttle := flag.Int("throttle", 0, "limit on max messages/second from each given")
+	flag.Parse()
 	var libs = data.New()
 	service := &SimpleIndexService{
 		operation.NewRemover(libs),
 		operation.NewIndexer(libs),
 		operation.NewQuerier(libs),
 		data.NewLock(),
-		input.NewMessageGateway(),
+		input.NewMessageGateway(throttle),
 	}
 	service.StartIndexing()
 }

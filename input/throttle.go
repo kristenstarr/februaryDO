@@ -1,7 +1,7 @@
 package input
 
 import (
-	//"time"
+	"time"
 	"bufio"
 	"net"
 )
@@ -18,7 +18,7 @@ type SimpleThrottler struct{
 func (s *SimpleThrottler) Throttle(conn net.Conn, output chan string) {
 
 	//A rate less than zero is interpreted as an error and defaults to zero.
-	//if (*s.rate <= 0) {
+	if (*s.rate <= 0) {
 		for {
 			message, messageError := bufio.NewReader(conn).ReadString('\n')
 
@@ -33,21 +33,23 @@ func (s *SimpleThrottler) Throttle(conn net.Conn, output chan string) {
 			}
 
 		}
-	//} else {
-	//	throttle := time.NewTicker(time.Duration(*s.rate))
-	//	for _ = range throttle.C {
-	//		message, messageError := bufio.NewReader(conn).ReadString('\n')
-	//		// If we have an error reading from socket, close and break loop/goroutine
-	//		if (messageError != nil) {
-	//			conn.Write([]byte("ERROR\n"))
-	//			conn.Close()
-	//			throttle.Stop()
-	//			break
-	//		} else {
-	//			output <- message
-	//		}
-	//	}
-	//}
+	} else {
+		throttle := time.NewTicker(time.Second / time.Duration(*s.rate))
+
+		for _ = range throttle.C {
+			message, messageError := bufio.NewReader(conn).ReadString('\n')
+			// If we have an error reading from socket, close and break loop/goroutine
+			if (messageError != nil) {
+				conn.Write([]byte("ERROR\n"))
+				conn.Close()
+				close(output)
+				throttle.Stop()
+				break
+			} else {
+				output <- message
+			}
+		}
+	}
 }
 
 func NewThrottler(rate *int) Throttler {

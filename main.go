@@ -1,144 +1,84 @@
 package main
 
 import (
-	"net"
-	"fmt"
-	"bufio"
+	"github.com/kristenfelch/pkgindexer/data"
+	"github.com/kristenfelch/pkgindexer/input"
+	"github.com/kristenfelch/pkgindexer/operation"
 	"strings"
-	"sync"
 )
 
-type Library struct{
-	Dependencies map[string]bool
-	Parents map[string]bool
+// IndexService is responsible for opening a Message Gateway and giving it a Channel
+// to return validated messages through.  Messages are then distributed to Remover, Indexer,
+// or Querier Services depending on the request, and response is sent back through a
+// channel so that Message Gateway can respond to client.
+type IndexService interface {
+	StartIndexing() (started bool, err error)
+}
+
+type SimpleIndexService struct {
+	remover operation.Remover
+	indexer operation.Indexer
+	querier operation.Querier
+	lock    data.IndexLock
+	gateway input.MessageGateway
+}
+
+func (s *SimpleIndexService) StartIndexing() (started bool, err error) {
+
+	c := make(chan *input.ValidatedMessage)
+	go s.gateway.Open(c)
+
+	for {
+		validMessage := <-c
+		s.ProcessMessage(validMessage)
+	}
+
+}
+
+func (s *SimpleIndexService) ProcessMessage(input *input.ValidatedMessage) {
+	s.lock.Lock()
+	respChan := input.ResponseChannel
+	var response bool
+	var err error
+
+	switch input.Verb {
+	case "REMOVE":
+		response, err = s.remover.Remove(input.Library)
+
+	case "INDEX":
+		var splitDeps []string
+		if len(input.Dependencies) > 0 {
+			splitDeps = strings.Split(input.Dependencies, ",")
+		} else {
+			splitDeps = make([]string, 0)
+		}
+		response, err = s.indexer.Index(input.Library, splitDeps)
+
+	case "QUERY":
+		response, err = s.querier.Query(input.Library)
+	}
+
+	if err != nil {
+		respChan <- "error"
+	} else {
+		if response {
+			respChan <- "ok"
+		} else {
+			respChan <- "fail"
+		}
+	}
+
+	s.lock.Unlock()
 }
 
 func main() {
-	var libs = make(map[string]Library)
-	var mutex = &sync.Mutex{}
-	ln, err := net.Listen("tcp", ":8080")
-	if err != nil {
-		fmt.Println("Error starting on 8080")
+	var libs = data.New()
+	service := &SimpleIndexService{
+		operation.NewRemover(libs),
+		operation.NewIndexer(libs),
+		operation.NewQuerier(libs),
+		data.NewLock(),
+		input.NewMessageGateway(),
 	}
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			fmt.Println("error accepting connecting")
-		}
-		go handleConnection(conn, libs, mutex)
-	}
-}
-
-func validateMessage(msg string) bool {
-	pieces := strings.Split(msg, "|")
-	if (len(pieces) != 3) {
-		return false;
-	}
-	method := pieces[0]
-	if (method != "REMOVE" && method != "INDEX" && method != "QUERY") {
-		return false;
-	}
-	lib := pieces[1]
-	if (len(lib) < 1) {
-		return false;
-	}
-	return true;
-}
-
-func handleConnection(conn net.Conn, libs map[string]Library, mutex *sync.Mutex) {
-	for {
-		message, _ := bufio.NewReader(conn).ReadString('\n')
-		if (!validateMessage(message)) {
-			conn.Write([]byte("ERROR\n"))
-		} else {
-			pieces := strings.Split(message, "|")
-			method := pieces[0]
-			lib := pieces[1]
-			dependencies := pieces[2][:len(pieces[2]) - 1]
-			mutex.Lock()
-			switch method {
-
-			case "REMOVE":
-				if library, ok := libs[lib]; ok {
-					if len(library.Parents) == 0 {
-						for key, _ := range library.Dependencies {
-							if dependentLibrary, ok := libs[key]; ok {
-								delete(dependentLibrary.Parents, lib)
-							}
-						}
-						delete(libs, lib)
-						conn.Write([]byte("OK\n"))
-					} else {
-						conn.Write([]byte("FAIL\n"))
-					}
-				} else {
-					conn.Write([]byte("OK\n"))
-				}
-			case "INDEX":
-				// WHAT happens if new dependencies aren't there, but already indexed with old list
-				// of dependencies that DO exist - do we remove??
-				var splitDeps []string
-				if (len(dependencies) > 0) {
-					splitDeps = strings.Split(dependencies, ",")
-				} else {
-					splitDeps = make([]string, 0)
-				}
-				missingDep := false
-				for _, dep := range splitDeps {
-					if _, ok := libs[dep]; !ok {
-						missingDep = true
-					}
-				}
-				if (missingDep) {
-					conn.Write([]byte("FAIL\n"))
-				} else {
-
-					depsMap := make(map[string]bool)
-					for _, dep := range splitDeps {
-						depsMap[dep] = true;
-					}
-
-					if oldLibrary, ok := libs[lib]; ok {
-
-						for key, _ := range oldLibrary.Dependencies {
-							if dependentLibrary, ok := libs[key]; ok {
-								delete(dependentLibrary.Parents, lib)
-							}
-						}
-
-						libs[lib] = Library{
-							Parents: make(map[string]bool),
-							Dependencies: depsMap,
-						}
-						for _, dep := range splitDeps {
-							if depLibrary, ok := libs[dep]; ok {
-								depLibrary.Parents[lib] = true
-							}
-						}
-
-					} else {
-						libs[lib] = Library{
-							Parents: make(map[string]bool),
-							Dependencies: depsMap,
-						}
-						for _, dep := range splitDeps {
-							if depLibrary, ok := libs[dep]; ok {
-								depLibrary.Parents[lib] = true
-							}
-						}
-					}
-					conn.Write([]byte("OK\n"))
-				}
-
-
-			case "QUERY":
-				if _, ok := libs[lib]; ok {
-					conn.Write([]byte("OK\n"))
-				} else {
-					conn.Write([]byte("FAIL\n"))
-				}
-			}
-			mutex.Unlock()
-		}
-	}
+	service.StartIndexing()
 }

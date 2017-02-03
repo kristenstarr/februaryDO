@@ -1,23 +1,27 @@
-# Package Dependency Management Challenge : 0.1.0
+# Package Dependency Management Challenge : 0.1.1
 
 ## Features
 
 1. All Tests Passing with regard to test harness with low concurrency.
+2. Modularized solution with 4 packages : data/err/input/operation
+3. Testing files in place beside main files in each package.
 
 ## Future Plans
 
 ### Required
-1. Overall architectural plan for modularizing solution to remove single scriptlike file.
-2. Testing files put in place side by side with business logic modules.
-3. Connection management : Rate limiting, identifying spammy clients, solve for high concurrency case.
-4. Input validation improvement using regex and sanitization.
-5. Business logic algorithm optimized, DRY principle, made readable.
-6. In memory data store and optimized locking - do we really need to lock the entire in memory cache?
-7. Uniform logging system.
-8. Documentation generated and included.
-9. Automated integration testing in addition to unit tests that have been added, modeled after test harness.
-10. Externalization of environment configuration.
-11. Docker-ization of service.
+- Connection management : Rate limiting, identifying spammy clients, solve for high concurrency case.
+- Input validation improvement using regex and sanitization.
+- Business logic algorithm optimized, DRY principle, made readable.
+- In memory data store and optimized locking - do we really need to lock the entire in memory cache?
+- Error handling using custom error types.
+- Uniform logging system.
+- Documentation generated and included.
+- Automated integration testing in addition to unit tests that have been added, modeled after test harness.
+- Externalization of environment configuration.
+- Docker-ization of service.
+- Basic performance tests.
+- Basic linting for code consistency.
   
 ## Versions
 - 0.1.0 - Initial messy solution to pass test harness with low concurrency.
+- 0.1.1 - Modularized solution split out between packages.

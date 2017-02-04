@@ -1,0 +1,12 @@
+.git
+.gitignore
+coverage
+vendor
+.env
+test-suite
+docker-compose.test.yml
+docker-compose.yml
+README.md
+.idea
+pkgindexer
+*.iml

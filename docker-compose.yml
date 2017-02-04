@@ -1,0 +1,10 @@
+version: '2'
+services:
+  pkgindexer:
+    build: .
+    container_name: pkgindexer
+    command: go run main.go
+    environment:
+      - PORT=8080
+    ports:
+      - 8080:8080

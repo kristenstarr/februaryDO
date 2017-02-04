@@ -20,6 +20,7 @@ type MessageGateway interface {
 
 type SimpleMessageGateway struct {
 	validator Validator
+	rate *int
 }
 
 type ValidatedMessage struct {
@@ -43,8 +44,17 @@ func (s *SimpleMessageGateway) Open(c chan<- *ValidatedMessage) (opened bool, er
 }
 
 func (s *SimpleMessageGateway) handleConnection(conn net.Conn, c chan<- *ValidatedMessage) {
+
+	throttler := NewThrottler(s.rate)
+
 	for {
-		message, _ := bufio.NewReader(conn).ReadString('\n')
+		throttler.Next()
+		message, msgError := bufio.NewReader(conn).ReadString('\n')
+		if (msgError != nil) {
+			conn.Close()
+			throttler.Stop()
+			break;
+		}
 		validated, validatedError := s.validator.ValidateInput(message)
 		if validatedError != nil {
 			conn.Write(s.formatResponse("error"))
@@ -79,8 +89,9 @@ func (s *SimpleMessageGateway) Close() (closed bool, err error) {
 	return true, nil
 }
 
-func NewMessageGateway() MessageGateway {
+func NewMessageGateway(throttle *int) MessageGateway {
 	return &SimpleMessageGateway{
 		NewValidator(),
+		throttle,
 	}
 }

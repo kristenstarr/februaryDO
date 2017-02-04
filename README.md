@@ -1,4 +1,4 @@
-# Package Dependency Management Challenge : 0.1.2
+# Package Dependency Management Challenge : 0.1.3
 
 ## Features
 
@@ -7,7 +7,8 @@
 3. Testing files in place beside main files in each package.
 4. Concurrency of 100 clients reached, locally.  Maximum is currently 32 for Docker image.
 5. Optional throttling of requests for rate limiting.
-6. Dockerized service, and docker-compose.yml included up for easy local deployment.
+6. Input validation utilizing Regex.
+7. Dockerized service, and docker-compose.yml included up for easy local deployment.
 
 
 ## Building and Running
@@ -36,7 +37,6 @@ docker run -p 8080:8080 -d pkgindexer
 
 ## Future Plans
 
-- Input validation improvement using regex and sanitization.
 - Business logic algorithm optimized, DRY principle, made readable.
 - In memory data store and optimized locking - do we really need to lock the entire in memory cache?
 - Error handling using custom error types.
@@ -51,6 +51,7 @@ docker run -p 8080:8080 -d pkgindexer
 - 0.1.0 - Initial messy solution to pass test harness with low concurrency.
 - 0.1.1 - Modularized solution split out between packages.
 - 0.1.2 - Concurrency goals met for local run, optional throttling implemented.
+- 0.1.3 - Input validation and tests.
 
 ## Performance Notes
 
@@ -61,7 +62,7 @@ docker run -p 8080:8080 -d pkgindexer
 * 3 runs per configuration.
 
 | Rate  | Test Harness Run Time  |
-|--:|---|
+|---|---|
 | Unthrottled  | 4.7 - 4.9s |
 | 1000 requests/client/second | 4.7-5 seconds  |
 | 500 requests/client/second  | 5.5-5.8 seconds  |

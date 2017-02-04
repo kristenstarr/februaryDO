@@ -1,10 +1,9 @@
 package input
 
 import (
+	"bufio"
 	"fmt"
 	"net"
-	//"time"
-	"bufio"
 )
 
 // MessageGateway is responsible for communication with the client through sockets.
@@ -37,7 +36,6 @@ func (s *SimpleMessageGateway) Open(c chan<- *ValidatedMessage) (opened bool, er
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			conn.Close()
 			fmt.Println(err)
 		} else {
 			go s.handleConnection(conn, c)
@@ -47,41 +45,30 @@ func (s *SimpleMessageGateway) Open(c chan<- *ValidatedMessage) (opened bool, er
 
 func (s *SimpleMessageGateway) handleConnection(conn net.Conn, c chan<- *ValidatedMessage) {
 
-	//var ticker *time.Ticker
-	//if (*s.rate > 0) {
-	//	ticker = time.NewTicker(time.Second / time.Duration(*s.rate))
-	//}
+	throttler := NewThrottler(s.rate)
 
 	for {
-		//if ticker != nil {
-		//	<-ticker.C
-		//}
-		_, messageError := bufio.NewReader(conn).ReadString('\n')
-
-		// If we have an error reading from socket, close and break loop/goroutine
-		if (messageError != nil) {
-			conn.Write([]byte("ERROR\n"))
+		throttler.Next()
+		message, msgError := bufio.NewReader(conn).ReadString('\n')
+		if (msgError != nil) {
 			conn.Close()
-			//if (ticker != nil) {
-			//	ticker.Stop()
-			//}
-			break
+			throttler.Stop()
+			break;
+		}
+		validated, validatedError := s.validator.ValidateInput(message)
+		if validatedError != nil {
+			conn.Write(s.formatResponse("error"))
 		} else {
+			ch := make(chan string, 1)
+			validMessage := &ValidatedMessage{
+				validated,
+				ch,
+			}
+			c <- validMessage
+			returned := <-ch
+			close(ch)
 
-			//validated, validatedError := s.validator.ValidateInput(message)
-			//if validatedError != nil {
-				conn.Write(s.formatResponse("ok"))
-			//} else {
-			//	ch := make(chan string, 1)
-			//	validMessage := &ValidatedMessage{
-			//		validated,
-			//		ch,
-			//	}
-			//	c <- validMessage
-			//	returned := <-ch
-			//	close(ch)
-			//	conn.Write(s.formatResponse(returned))
-			//}
+			conn.Write(s.formatResponse(returned))
 		}
 	}
 }

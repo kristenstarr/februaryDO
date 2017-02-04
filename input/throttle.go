@@ -1,59 +1,50 @@
 package input
 
-import (
-	"time"
-	"bufio"
-	"net"
-)
+import "time"
 
+// Throttler is responsible for rate limiting our traffic.
+// It has 2 methods - Next() will return when it is a permissible time for the next message to
+// be processed, Stop will stop the throttler from generating any more available opportunities
+// for messages to be processed.
 type Throttler interface {
 
-	Throttle(conn net.Conn, output chan string)
+	// Next() will complete as soon as it is an appropriate time for the next message to be handled.
+	// Will return true if rate limiting is in place and Next completes successfully.
+	// Will return false if we have no rate limiting or our throttler is stopped
+	Next() bool
+
+	// Stop() is primarily for clean up purposes and stops our throttler from generating opportunities.
+	Stop()
 }
 
 type SimpleThrottler struct{
-	rate *int
+	ticker *time.Ticker
+	stopped bool
 }
 
-func (s *SimpleThrottler) Throttle(conn net.Conn, output chan string) {
+func (s *SimpleThrottler) Next() bool {
+	if (s.ticker != nil && !s.stopped) {
+		<-s.ticker.C
+		return true
+	}
+	return false
+}
 
-	//A rate less than zero is interpreted as an error and defaults to zero.
-	if (*s.rate <= 0) {
-		for {
-			message, messageError := bufio.NewReader(conn).ReadString('\n')
-
-			// If we have an error reading from socket, close and break loop/goroutine
-			if (messageError != nil) {
-				conn.Write([]byte("ERROR\n"))
-				conn.Close()
-				close(output)
-				break
-			} else {
-				output <- message
-			}
-
-		}
-	} else {
-		throttle := time.NewTicker(time.Second / time.Duration(*s.rate))
-
-		for _ = range throttle.C {
-			message, messageError := bufio.NewReader(conn).ReadString('\n')
-			// If we have an error reading from socket, close and break loop/goroutine
-			if (messageError != nil) {
-				conn.Write([]byte("ERROR\n"))
-				conn.Close()
-				close(output)
-				throttle.Stop()
-				break
-			} else {
-				output <- message
-			}
-		}
+func (s *SimpleThrottler) Stop() {
+	if (s.ticker != nil) {
+		s.stopped = true
+		s.ticker.Stop()
 	}
 }
 
 func NewThrottler(rate *int) Throttler {
+	// We are implementing a throttle using a 'ticker' that adds a message to a channel at a set rate.
+	var ticker *time.Ticker
+	if (*rate > 0) {
+		ticker = time.NewTicker(time.Second / time.Duration(*rate))
+	}
 	return &SimpleThrottler{
-		rate,
+		ticker,
+		false,
 	}
 }

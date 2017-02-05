@@ -21,7 +21,7 @@
 go run main.go
 </code></pre>
 
-## Docker Compose
+### Docker Compose
 
 <pre><code>docker-compose build
 docker-compose up -d
@@ -57,8 +57,7 @@ NOTE: Too much intensive logging, TRACE/DEBUG, will likely cause undesirable per
 Automated tests include unit, functional, and benchmark tests. Unit and functional tests can be
 run via the following from the main directory.
 
-<pre><code>go test ./...
-</code></pre>
+<pre><code>go test ./...</code></pre>
 
 NOTE : Integration tests are meant to be end-to-end tests of expected behavior.
 Integration test module requires that a server be running on port 8080

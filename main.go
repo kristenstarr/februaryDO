@@ -94,5 +94,7 @@ func main() {
 		data.NewLock(),
 		input.NewMessageGateway(throttle, logger),
 	}
+	logger.Info("Indexing service starting on port 8080...")
+
 	service.StartIndexing()
 }

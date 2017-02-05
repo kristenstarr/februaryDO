@@ -11,7 +11,7 @@
 7. Dockerized service, and docker-compose.yml included up for easy local deployment.
 8. Simple custom logger that includes level (trace/info/error/debug)
 9. Documentation on all modules, to be generated using godoc.
-10. Integration tests that utilize test client from provided test harness.
+10. Integration and benchmark tests that utilize test client from provided test harness.
 
 
 ## Building and Running
@@ -19,7 +19,7 @@
 ### Local Host
 
 <pre><code>go build
-go run main.go [-throttle 1000]
+go run main.go
 </code></pre>
 
 ### Docker Compose
@@ -42,6 +42,17 @@ By setting the 'throttle' value, we can limit each client in its ability to send
 service at a capped rate.  Rate is given as an integer in messages per second per client.
 
 <pre><code>go run main.go -throttle 1000</code></pre>
+
+NOTE: Throttling is better observed by using the docker setups, as the environment is cleaner and
+more reproducable than local environments.  See below Request Throttling Comparisons for some numbers
+that make sense.
+
+### Logging
+Log level can be set by using the logLevel parameter, which defaults to INFO.
+
+<pre><code>go run main.go -logLevel TRACE</code></pre>
+
+NOTE: Too much intensive logging, TRACE/DEBUG, will likely cause undesirable performance under load.
 
 ## Testing
 Automated tests include unit, functional, and benchmark tests. Unit and functional tests can be
@@ -71,11 +82,6 @@ In order to include benchmark tests, use the following command instead.
 
 <pre><code>go test ./... -bench=.
 </code></pre>
-
-### Logging
-Log level can be set by using the logLevel parameter, which defaults to INFO.
-
-<pre><code>go run main.go -logLevel TRACE</code></pre>
 
 ## Documentation
 To generate and view logs, use the godoc module as such, with port of your choice:

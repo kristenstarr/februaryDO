@@ -1,4 +1,4 @@
-# Package Dependency Management Challenge : 0.1.5
+# Package Dependency Management Challenge : 0.1.6
 
 ## Features
 
@@ -10,7 +10,7 @@
 6. Input validation utilizing Regex.
 7. Dockerized service, and docker-compose.yml included up for easy local deployment.
 8. Simple custom logger that includes level (trace/info/error/debug)
-9. Documentation all modules.
+9. Documentation on all modules, to be generated using godoc.
 
 ## Building and Running
 
@@ -57,10 +57,7 @@ Then you will be able to navigate to the following link to view documentation.
 
 ## Future Plans
 
-- Uniform logging system.
-- Documentation generated and included.
 - Automated integration testing in addition to unit tests that have been added, modeled after test harness.
-- Externalization of environment configuration.
 - Basic performance tests.
 - Basic linting for code consistency.
   
@@ -71,6 +68,7 @@ Then you will be able to navigate to the following link to view documentation.
 - 0.1.3 - Input validation and tests.
 - 0.1.4 - Cleaning up and testing of business logic.
 - 0.1.5 - Custom error message type.
+- 0.1.6 - Simple custom logging interface, and documentation added to work with godoc.
 
 ## Performance Notes
 

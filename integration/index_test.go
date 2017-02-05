@@ -15,10 +15,10 @@ import (
 func TestSimpleIndexAndQuery(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
 	respCode, err := client.Send("INDEX|testpackage1|")
 	if (err != nil) {
 		t.Error(err)
@@ -39,10 +39,10 @@ func TestSimpleIndexAndQuery(t *testing.T) {
 func TestIndexWithMissingDependencies(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
 	respCode, err := client.Send("INDEX|testpackage1|missingdep")
 	if (err != nil) {
 		t.Error(err)
@@ -63,10 +63,10 @@ func TestIndexWithMissingDependencies(t *testing.T) {
 func TestIndexWithPresentDependencies(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
 
 	//ensure that package cannot be indexed when dependencies are missing
 	respCode, err := client.Send("INDEX|testpackage3|testpackage1,testpackage2")
@@ -94,14 +94,14 @@ func TestIndexWithPresentDependencies(t *testing.T) {
 }
 
 // Tests that indexing a package that has already been indexed updates dependencies -
-// we test this be attempting to remove library that are no longer dependencies.
+// we test this be attempting to remove package that are no longer dependencies.
 func TestIndexUpdatesDependencies(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
 
 	//index dependencies
 	respCode, err := client.Send("INDEX|testpackage1|")
@@ -144,10 +144,11 @@ func TestIndexUpdatesDependencies(t *testing.T) {
 func BenchmarkIndexMessage(b *testing.B) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		b.Error(err)
+		b.SkipNow()
 	}
+	defer client.Close()
+
 	// Reset timer after setup
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

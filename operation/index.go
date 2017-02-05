@@ -5,8 +5,8 @@ import (
 	"github.com/kristenfelch/pkgindexer/logging"
 )
 
-// Indexer is responsible for adding a Library to our Index.
-// It encapsulates business logic for knowing when a Library can be added,
+// Indexer is responsible for adding a Package to our Index.
+// It encapsulates business logic for knowing when a Package can be added,
 // leaving actual storage of index to IndexStore.
 type Indexer interface {
 	// indicates if element was Indexed, err if we tried and failed.
@@ -21,7 +21,7 @@ type SimpleIndexer struct {
 func (s *SimpleIndexer) Index(name string, dependencies []string) (Indexed bool, err error) {
 	//// Check to see if all dependencies are present
 	for _, dep := range dependencies {
-		lib, libError := s.store.HasLibrary(dep)
+		lib, libError := s.store.HasPackage(dep)
 		if libError != nil {
 			//error determining if dependency is there, for indexing
 			s.logger.Error(libError.Error())
@@ -33,19 +33,19 @@ func (s *SimpleIndexer) Index(name string, dependencies []string) (Indexed bool,
 		}
 	}
 
-	exists, existsErr := s.store.HasLibrary(name)
+	exists, existsErr := s.store.HasPackage(name)
 	if existsErr != nil {
-		// error looking up existing indexed library
+		// error looking up existing indexed package
 		s.logger.Error(existsErr.Error())
 		return false, existsErr
 	}
 	if exists {
-		//remove library with old dependencies
-		s.store.RemoveLibrary(name)
+		//remove package with old dependencies
+		s.store.RemovePackage(name)
 
 	}
 
-	return s.store.AddLibrary(name, dependencies)
+	return s.store.AddPackage(name, dependencies)
 
 }
 

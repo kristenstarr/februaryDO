@@ -45,7 +45,7 @@ func (s *SimpleIndexService) ProcessMessage(input *input.ValidatedMessage) {
 
 	switch input.Verb {
 	case "REMOVE":
-		response, err = s.remover.Remove(input.Library)
+		response, err = s.remover.Remove(input.Package)
 
 	case "INDEX":
 		var splitDeps []string
@@ -54,10 +54,10 @@ func (s *SimpleIndexService) ProcessMessage(input *input.ValidatedMessage) {
 		} else {
 			splitDeps = make([]string, 0)
 		}
-		response, err = s.indexer.Index(input.Library, splitDeps)
+		response, err = s.indexer.Index(input.Package, splitDeps)
 
 	case "QUERY":
-		response, err = s.querier.Query(input.Library)
+		response, err = s.querier.Query(input.Package)
 	}
 
 	if err != nil {

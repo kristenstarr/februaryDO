@@ -13,10 +13,10 @@ import (
 func TestRemovalNotPresent(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
 	respCode, err := client.Send("REMOVE|testpackage1|")
 	if (err != nil || respCode != OK) {
 		t.Error("Package remove should return true when package is not indexed")
@@ -28,10 +28,10 @@ func TestRemovalNotPresent(t *testing.T) {
 func TestRemovalSuccess(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
 	respCode, err := client.Send("INDEX|testpackage1|")
 	if (err != nil || respCode != OK) {
 		t.Error("Package should be successfully indexed")
@@ -47,10 +47,10 @@ func TestRemovalSuccess(t *testing.T) {
 func TestRemovalFailure(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
 	respCode, err := client.Send("INDEX|testpackage1|")
 	if (err != nil || respCode != OK) {
 		t.Error("Package should be successfully indexed")
@@ -70,10 +70,10 @@ func TestRemovalFailure(t *testing.T) {
 func BenchmarkRemoveNonIndexedMessage(b *testing.B) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		b.Error(err)
+		b.SkipNow()
 	}
+	defer client.Close()
 	// Reset timer after setup
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

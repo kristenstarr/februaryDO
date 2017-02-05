@@ -12,17 +12,17 @@ import (
 func TestErrorMessages(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
 	respCode, err := client.Send("BadMessage")
 	if (err != nil || respCode != ERROR) {
 		t.Error("ERROR should be returned for bad syntax")
 	}
 	respCode, err = client.Send("QUERY|")
 	if (err != nil || respCode != ERROR) {
-		t.Error("ERROR should be returned for missing library")
+		t.Error("ERROR should be returned for missing package")
 	}
 	respCode, err = client.Send("QUERY|LIB")
 	if (err != nil || respCode != ERROR) {
@@ -43,10 +43,10 @@ func TestErrorMessages(t *testing.T) {
 func BenchmarkErrorMessages(b *testing.B) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		b.Error(err)
+		b.SkipNow()
 	}
+	defer client.Close()
 	// Reset timer after setup
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

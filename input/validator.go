@@ -16,7 +16,7 @@ type SimpleValidator struct{}
 
 type InputMessage struct {
 	Verb         string
-	Library      string
+	Package      string
 	Dependencies string
 }
 
@@ -38,7 +38,7 @@ func (s *SimpleValidator) ValidateInput(input string) (validMessage *InputMessag
 	lib := pieces[1]
 	match, _ := regexp.MatchString(`^[a-zA-Z0-9_\-\+]+$`, lib)
 	if (!match) {
-		return nil, err.NewIndexError(fmt.Sprintf("Library name missing or incorrect : %s", lib))
+		return nil, err.NewIndexError(fmt.Sprintf("Package name missing or incorrect : %s", lib))
 	}
 
 	//Make sure that our dependencies list is a comma delimited list of alphanumeric words.

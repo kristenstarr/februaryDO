@@ -16,7 +16,7 @@ func TestIndexSuccessful(t *testing.T) {
 
 	indexed, err := indexer.Index("lib", []string{"dep1", "dep2"})
 	if (err != nil || !indexed) {
-		t.Error("When all dependencies are present, library should be successfully indexed")
+		t.Error("When all dependencies are present, package should be successfully indexed")
 	}
 }
 

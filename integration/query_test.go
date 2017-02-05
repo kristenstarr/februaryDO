@@ -12,10 +12,10 @@ import (
 func TestQueryNotIndexed(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
 	respCode, err := client.Send("QUERY|testpackage1|")
 	if (err != nil || respCode != FAIL) {
 		t.Error("Package query should FAIL if package hasn't been indexed")
@@ -27,10 +27,11 @@ func TestQueryNotIndexed(t *testing.T) {
 func TestQueryIndexed(t *testing.T) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		t.Error(err)
+		t.SkipNow()
 	}
+	defer client.Close()
+
 	client.Send("INDEX|testpackage1|")
 	respCode, err := client.Send("QUERY|testpackage1|")
 	if (err != nil || respCode != OK) {
@@ -43,10 +44,10 @@ func TestQueryIndexed(t *testing.T) {
 func BenchmarkQueryMessage(b *testing.B) {
 	setupTest()
 	client, err := MakeTCPPackageIndexClient(8080)
-	defer client.Close()
 	if (err != nil) {
-		b.Error(err)
+		b.SkipNow()
 	}
+	defer client.Close()
 	// Reset timer after setup
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

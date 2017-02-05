@@ -40,7 +40,7 @@ func TestGatewayReceiveMessage(t *testing.T) {
 	val := <- msgChannel
 	val.ResponseChannel <- "OK"
 	close(msgChannel)
-	if (val.Dependencies != "dep" || val.Library != "lib" || val.Verb != "QUERY") {
+	if (val.Dependencies != "dep" || val.Package != "lib" || val.Verb != "QUERY") {
 		t.Errorf("Invalid message returned through channel")
 	}
 }

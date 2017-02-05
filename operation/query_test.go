@@ -12,7 +12,7 @@ func TestQueryTrue(t *testing.T) {
 
 	hasIndex, err := querier.Query("lib")
 	if (err != nil || !hasIndex) {
-		t.Error("When library is present in index, true should be returned with no error")
+		t.Error("When package is present in index, true should be returned with no error")
 	}
 }
 
@@ -23,6 +23,6 @@ func TestQueryFalse(t *testing.T) {
 
 	hasIndex, err := querier.Query("lib")
 	if (err != nil || hasIndex) {
-		t.Error("When library is not present in index, false should be returned with no error")
+		t.Error("When package is not present in index, false should be returned with no error")
 	}
 }

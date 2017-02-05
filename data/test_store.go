@@ -13,15 +13,15 @@ type TestStore struct {
 
 }
 
-func (t *TestStore) AddLibrary(name string, deps []string) (added bool, err error) {
+func (t *TestStore) AddPackage(name string, deps []string) (added bool, err error) {
 	return t.canAdd, t.errAdd
 }
 
-func (t *TestStore) RemoveLibrary(name string) (removed bool, err error) {
+func (t *TestStore) RemovePackage(name string) (removed bool, err error) {
 	return t.canRemove, t.errRemove
 }
 
-func (t *TestStore) HasLibrary(name string) (exists bool, err error) {
+func (t *TestStore) HasPackage(name string) (exists bool, err error) {
 	return t.canHas, t.errHas
 }
 

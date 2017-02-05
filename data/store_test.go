@@ -2,79 +2,85 @@ package data
 
 import (
 	"testing"
+	"github.com/kristenfelch/pkgindexer/logging"
 )
 
-// Tests simple addition of library to index.
-func TestAddLibrary(t *testing.T) {
-	store := NewIndexStore()
-	added, err := store.AddLibrary("library", []string{"dep1", "dep2"})
+// Tests simple addition of package to index.
+func TestAddPackage(t *testing.T) {
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
+	added, err := store.AddPackage("package", []string{"dep1", "dep2"})
 	if (err != nil || !added) {
-		t.Errorf("Error encountered adding library : %s", err.Error())
+		t.Errorf("Error encountered adding package : %s", err.Error())
 	}
 }
 
-// Tests adding of library and that new library is added to parents' lists of its dependencies.
-func TestAddLibraryToDependenciesParents(t *testing.T) {
-	store := NewIndexStore()
-	store.AddLibrary("dep1", nil)
-	store.AddLibrary("dep2", nil)
+// Tests adding of package and that new package is added to parents' lists of its dependencies.
+func TestAddPackageToDependenciesParents(t *testing.T) {
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
+	store.AddPackage("dep1", nil)
+	store.AddPackage("dep2", nil)
 
 	hasParents, err := store.HasParents("dep1")
 	if (err != nil || hasParents) {
-		t.Errorf("Library should not have any parents when initially indexed")
+		t.Errorf("Package should not have any parents when initially indexed")
 	}
-	store.AddLibrary("library", []string{"dep1", "dep2"})
+	store.AddPackage("package", []string{"dep1", "dep2"})
 	hasParents, err = store.HasParents("dep1")
 	if (err != nil || !hasParents) {
-		t.Error("Library should have parents once another library depends on it")
+		t.Error("Package should have parents once another package depends on it")
 	}
 	hasParents, err = store.HasParents("dep2")
 	if (err != nil || !hasParents) {
-		t.Error("Library should have parents once another library depends on it")
+		t.Error("Package should have parents once another package depends on it")
 	}
 }
 
-// Tests simple removal of a library that is already not indexed.
-func TestRemoveNonIndexedLibrary(t *testing.T) {
-	store := NewIndexStore()
-	removed, err := store.RemoveLibrary("dep1")
+// Tests simple removal of a package that is already not indexed.
+func TestRemoveNonIndexedPackage(t *testing.T) {
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
+	removed, err := store.RemovePackage("dep1")
 	if (err != nil || !removed) {
-		t.Error("Remove should return with no error if library is not present")
+		t.Error("Remove should return with no error if package is not present")
 	}
 }
 
-// Tests that when library is removed, it is also removed from parents list of its dependencies.
+// Tests that when package is removed, it is also removed from parents list of its dependencies.
 func TestRemoveIndexedWithDeps(t *testing.T) {
-	store := NewIndexStore()
-	store.AddLibrary("dep1", nil)
-	store.AddLibrary("library", []string{"dep1"})
-	//dependency should have library as a parent
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
+	store.AddPackage("dep1", nil)
+	store.AddPackage("package", []string{"dep1"})
+	//dependency should have package as a parent
 	hasParents, err := store.HasParents("dep1")
 	if (err != nil || !hasParents) {
-		t.Error("Library should have parents once another library depends on it")
+		t.Error("Package should have parents once another package depends on it")
 	}
-	removed, err := store.RemoveLibrary("library")
+	removed, err := store.RemovePackage("package")
 	if (err != nil || !removed) {
 		t.Error("Remove should return with no error")
 	}
 	//once parent is removed, dependency should have it removed from its parent list.
 	hasParents, err = store.HasParents("dep1")
 	if (err != nil || hasParents) {
-		t.Error("Library should have had parent removed")
+		t.Error("Package should have had parent removed")
 	}
 }
 
-// Tests simple querying for library once it has been added.
-func TestHasLibrary(t *testing.T) {
-	store := NewIndexStore()
-	exists, err := store.HasLibrary("library")
+// Tests simple querying for package once it has been added.
+func TestHasPackage(t *testing.T) {
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
+	exists, err := store.HasPackage("package")
 	if (err != nil || exists) {
-		t.Error("Has Library should return false before library has been indexed")
+		t.Error("Has Package should return false before package has been indexed")
 	}
-	store.AddLibrary("library", nil)
-	exists, err = store.HasLibrary("library")
+	store.AddPackage("package", nil)
+	exists, err = store.HasPackage("package")
 	if (err != nil || !exists) {
-		t.Error("Has Library should return true once library has been indexed")
+		t.Error("Has Package should return true once package has been indexed")
 	}
 
 }

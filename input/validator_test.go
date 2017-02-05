@@ -35,7 +35,7 @@ func TestBadFormat(t *testing.T) {
 	validator := NewValidator()
 	badQuery := "NO_PIPES"
 	_, err := validator.ValidateInput(badQuery)
-	if (strings.Index(err.Error(), "Input does not have 3 arguments : NO_PIPES") != 0) {
+	if (strings.Index(err.Error(), "Input does not have 3 arguments : NO_PIPES") == -1) {
 		t.Errorf("Incorrect error message : %s", err.Error())
 	}
 }
@@ -45,17 +45,17 @@ func TestBadVerb(t *testing.T) {
 	validator := NewValidator()
 	badQuery := "FAKE|lib|\n"
 	_, err := validator.ValidateInput(badQuery)
-	if (strings.Index(err.Error(), "Input method should be REMOVE/INDEX/QUERY, not : FAKE") != 0) {
+	if (strings.Index(err.Error(), "Input method should be REMOVE/INDEX/QUERY, not : FAKE") == -1) {
 		t.Errorf("Incorrect error message : %s", err.Error())
 	}
 }
 
-// Tests Bad Library.
-func TestBadLibrary(t *testing.T) {
+// Tests Bad Package.
+func TestBadPackage(t *testing.T) {
 	validator := NewValidator()
 	badQuery := "QUERY|l*ib|\n"
 	_, err := validator.ValidateInput(badQuery)
-	if (strings.Index(err.Error(), "Library name missing or incorrect : l*ib") != 0) {
+	if (strings.Index(err.Error(), "Package name missing or incorrect : l*ib") == -1) {
 		t.Errorf("Incorrect error message : %s", err.Error())
 	}
 }
@@ -65,7 +65,7 @@ func TestBadDependencies(t *testing.T) {
 	validator := NewValidator()
 	badQuery := "QUERY|lib|c&\n"
 	_, err := validator.ValidateInput(badQuery)
-	if (strings.Index(err.Error(), "Dependencies are incorrectly formatted : c&") != 0) {
+	if (strings.Index(err.Error(), "Dependencies are incorrectly formatted : c&") == -1) {
 		t.Errorf("Incorrect error message : %s", err.Error())
 	}
 }
@@ -77,8 +77,8 @@ func validateMessage(t *testing.T, result *InputMessage, err error, expectedVerb
 	if (result.Verb != expectedVerb) {
 		t.Errorf("Incorrect message verb parsed : %s", result.Verb)
 	}
-	if (result.Library != expectedLib) {
-		t.Errorf("Incorrect message library parsed : %s", result.Library)
+	if (result.Package != expectedLib) {
+		t.Errorf("Incorrect message package parsed : %s", result.Package)
 	}
 	if (result.Dependencies != expectedDeps) {
 		t.Errorf("Incorrect message dependencies parsed : %s", result.Dependencies)

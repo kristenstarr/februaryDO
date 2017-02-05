@@ -3,6 +3,7 @@ package input
 import (
 	"testing"
 	"bytes"
+	"github.com/kristenfelch/pkgindexer/logging"
 )
 
 // TestingGateway mocks the portion of our Gateway that deals with the network.
@@ -21,10 +22,12 @@ func (s *TestingGateway) Open(c chan<- *ValidatedMessage) (opened bool, err erro
 
 func NewTestingGateway() MessageGateway {
 	throttle := 0
+	logLevel := "FATAL"
 	return &TestingGateway{
 		SimpleMessageGateway{
 			NewValidator(),
 			&throttle,
+			logging.NewIndexLogger(&logLevel),
 		},
 	}
 }
@@ -37,7 +40,7 @@ func TestGatewayReceiveMessage(t *testing.T) {
 	val := <- msgChannel
 	val.ResponseChannel <- "OK"
 	close(msgChannel)
-	if (val.Dependencies != "dep" || val.Library != "lib" || val.Verb != "QUERY") {
+	if (val.Dependencies != "dep" || val.Package != "lib" || val.Verb != "QUERY") {
 		t.Errorf("Invalid message returned through channel")
 	}
 }
@@ -45,9 +48,11 @@ func TestGatewayReceiveMessage(t *testing.T) {
 // Tests basic formatting of responses to client.
 func TestGatewayFormatResponse(t *testing.T) {
 	throttle := 0
+	logLevel := "FATAL"
 	gateway := &SimpleMessageGateway{
 		NewValidator(),
 		&throttle,
+		logging.NewIndexLogger(&logLevel),
 	}
 	formatted := gateway.formatResponse("ok")
 	if (!bytes.Equal(formatted, []byte("OK\n"))) {

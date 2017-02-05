@@ -19,7 +19,7 @@ type SimpleRemover struct {
 }
 
 func (s *SimpleRemover) Remove(name string) (removed bool, err error) {
-	lib, libError := s.store.HasLibrary(name)
+	lib, libError := s.store.HasPackage(name)
 	if libError != nil {
 		s.logger.Error(libError.Error())
 		return false, libError
@@ -33,7 +33,7 @@ func (s *SimpleRemover) Remove(name string) (removed bool, err error) {
 		if hasParents {
 			return false, nil
 		} else {
-			removed, removedErr := s.store.RemoveLibrary(name)
+			removed, removedErr := s.store.RemovePackage(name)
 			if removedErr != nil {
 				s.logger.Error(removedErr.Error())
 				return false, removedErr

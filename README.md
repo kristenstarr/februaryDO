@@ -21,7 +21,7 @@
 go run main.go
 </code></pre>
 
-### Docker Compose
+## Docker Compose
 
 <pre><code>docker-compose build
 docker-compose up -d

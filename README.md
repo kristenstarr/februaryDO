@@ -123,10 +123,10 @@ further processing.
 
 | Name  | Number of Runs  | Average Run Time  |
 |---|---|---|
-BenchmarkErrorMessages-8          	   30000	     38065 ns/op
-BenchmarkIndexMessage-8           	   20000	     63296 ns/op
-BenchmarkQueryMessage-8           	   20000	     59702 ns/op
-BenchmarkRemoveNonIndexedMessage-8	   20000	     59586 ns/op
+| BenchmarkErrorMessages-8  | 30000  | 38065 ns/op  |
+| BenchmarkIndexMessage-8  | 20000  | 63296 ns/op  |
+| BenchmarkQueryMessage-8  | 20000  | 59702 ns/op  |
+| BenchmarkRemoveNonIndexedMessage-8  | 20000  | 59586 ns/op  |
 
 
 ### Request Throttling Comparisons

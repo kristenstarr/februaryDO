@@ -2,8 +2,8 @@ package input
 
 import (
 	"bufio"
-	"fmt"
 	"net"
+	"github.com/kristenfelch/pkgindexer/logging"
 )
 
 // MessageGateway is responsible for communication with the client through sockets.
@@ -18,10 +18,11 @@ type MessageGateway interface {
 	Close() (closed bool, err error)
 }
 
-// Simple Message Gateway is a MessageGateway that has an optional rate limit.
+// SimpleMessageGateway is a MessageGateway that has an optional rate limit.
 type SimpleMessageGateway struct {
 	validator Validator
 	rate *int
+	logger logging.Logger
 }
 
 // ValidatedMessage contains an input message as well as a channel created to receive the
@@ -35,12 +36,12 @@ type ValidatedMessage struct {
 func (s *SimpleMessageGateway) Open(c chan<- *ValidatedMessage) (opened bool, err error) {
 	ln, err := net.Listen("tcp", ":8080")
 	if err != nil {
-		fmt.Println("Error starting on 8080")
+		s.logger.Error("Error starting on 8080")
 	}
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			fmt.Println(err)
+			s.logger.Error(err.Error())
 		} else {
 			go s.handleConnection(conn, c)
 		}
@@ -54,6 +55,7 @@ func (s *SimpleMessageGateway) handleConnection(conn net.Conn, c chan<- *Validat
 		throttler.Next()
 		message, msgError := bufio.NewReader(conn).ReadString('\n')
 		if (msgError != nil) {
+			s.logger.Debug("No more messages available from connection")
 			conn.Close()
 			throttler.Stop()
 			break;
@@ -67,6 +69,7 @@ func (s *SimpleMessageGateway) handleConnection(conn net.Conn, c chan<- *Validat
 func (s *SimpleMessageGateway) handleMessage(conn net.Conn, message string, c chan<- *ValidatedMessage) {
 	validated, validatedError := s.validator.ValidateInput(message)
 	if validatedError != nil {
+		s.logger.Debug(validatedError.Error())
 		conn.Write(s.formatResponse("error"))
 	} else {
 		ch := make(chan string, 1)
@@ -98,9 +101,11 @@ func (s *SimpleMessageGateway) Close() (closed bool, err error) {
 	return true, nil
 }
 
-func NewMessageGateway(throttle *int) MessageGateway {
+// NewMessageGateway create an instance of MessageGateway including validator and throttler.
+func NewMessageGateway(throttle *int, logger logging.Logger) MessageGateway {
 	return &SimpleMessageGateway{
 		NewValidator(),
 		throttle,
+		logger,
 	}
 }

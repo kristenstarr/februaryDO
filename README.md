@@ -1,4 +1,4 @@
-# Package Dependency Management Challenge : 0.1.5
+# Package Dependency Management Challenge : 0.1.6
 
 ## Features
 
@@ -9,7 +9,8 @@
 5. Optional throttling of requests for rate limiting.
 6. Input validation utilizing Regex.
 7. Dockerized service, and docker-compose.yml included up for easy local deployment.
-
+8. Simple custom logger that includes level (trace/info/error/debug)
+9. Documentation on all modules, to be generated using godoc.
 
 ## Building and Running
 
@@ -32,12 +33,31 @@ docker-compose logs -f
 docker run -p 8080:8080 -d pkgindexer
 </code></pre>
 
+## Configuration
+
+### Throttling
+By setting the 'throttle' value, we can limit each client in its ability to send messages to our
+service at a capped rate.  Rate is given as an integer in messages per second per client.
+
+<pre><code>go run main.go -throttle 1000</code></pre>
+
+### Logging
+Log level can be set by using the logLevel parameter, which defaults to INFO.
+
+<pre><code>go run main.go -logLevel TRACE</code></pre>
+
+## Documentation
+To generate and view logs, use the godoc module as such, with port of your choice:
+
+<pre><code>godoc -http=:6060</code></pre>
+
+Then you will be able to navigate to the following link to view documentation.
+
+<pre><code>http://localhost:6060/pkg/github.com/kristenfelch/pkgindexer/</code></pre>
+
 ## Future Plans
 
-- Uniform logging system.
-- Documentation generated and included.
 - Automated integration testing in addition to unit tests that have been added, modeled after test harness.
-- Externalization of environment configuration.
 - Basic performance tests.
 - Basic linting for code consistency.
   
@@ -48,6 +68,7 @@ docker run -p 8080:8080 -d pkgindexer
 - 0.1.3 - Input validation and tests.
 - 0.1.4 - Cleaning up and testing of business logic.
 - 0.1.5 - Custom error message type.
+- 0.1.6 - Simple custom logging interface, and documentation added to work with godoc.
 
 ## Performance Notes
 

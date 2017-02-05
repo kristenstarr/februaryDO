@@ -1,6 +1,10 @@
 package data
 
-import "github.com/kristenfelch/pkgindexer/err"
+import (
+	"github.com/kristenfelch/pkgindexer/err"
+	"github.com/kristenfelch/pkgindexer/logging"
+	"fmt"
+)
 
 // IndexStore is responsible for storing the current state of our index.
 // It encapsulates the lower level operations of adding, removing, and querying for
@@ -22,6 +26,7 @@ type IndexStore interface {
 
 type MapsIndexStore struct {
 	store map[string]*Library
+	logger logging.Logger
 }
 
 // Library is a type of struct used to store our libraries that have been indexed.
@@ -47,6 +52,7 @@ func (m *MapsIndexStore) AddLibrary(name string, deps []string) (added bool, err
 		if depLibrary, _ := m.getLibrary(deps[v]); depLibrary != nil {
 			// add this library to each dependency's parents, so that we know we
 			// cannot remove the dependency.
+			m.logger.Trace(fmt.Sprintf("Library %s added to dependencies of %s", name, deps[v]))
 			depLibrary.Parents[name] = true
 		}
 	}
@@ -56,6 +62,7 @@ func (m *MapsIndexStore) AddLibrary(name string, deps []string) (added bool, err
 		// thus initialize with an empty list.
 		make(map[string]bool),
 	}
+	m.logger.Trace(fmt.Sprintf("Library %s added to Index", name))
 	return true, nil
 }
 
@@ -66,10 +73,12 @@ func (m *MapsIndexStore) RemoveLibrary(name string) (removed bool, error error) 
 			if dependentLibrary, _ := m.getLibrary(key); dependentLibrary != nil {
 				// remove this library from each dependency's parents, so that we know
 				// we can remove the dependency if no others depend on it.
+				m.logger.Trace(fmt.Sprintf("Library %s removed as parent of %s", name, key))
 				delete(dependentLibrary.Parents, name)
 			}
 		}
 	}
+	m.logger.Trace(fmt.Sprintf("Library %s removed from Index", name))
 	return true, nil
 }
 
@@ -97,8 +106,9 @@ func (m *MapsIndexStore) HasParents(name string) (hasParents bool, error error) 
 	}
 }
 
-func NewIndexStore() IndexStore {
+func NewIndexStore(logger logging.Logger) IndexStore {
 	return &MapsIndexStore{
 		make(map[string]*Library),
+		logger,
 	}
 }

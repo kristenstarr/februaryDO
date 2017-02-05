@@ -13,10 +13,10 @@ type IndexError struct {
 }
 
 func (e *IndexError) Error() string {
-	return fmt.Sprintf("%s : %s", e.msg, e.time.Format(time.UnixDate))
+	return fmt.Sprintf("%s : %s", e.time.Format(time.UnixDate), e.msg)
 }
 
-// Creates a new IndexError including the current timestamp
+// NewIndexError creates a new IndexError including the current timestamp
 func NewIndexError(text string) error {
 	return &IndexError{
 		text,

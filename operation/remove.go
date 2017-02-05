@@ -1,6 +1,9 @@
 package operation
 
-import "github.com/kristenfelch/pkgindexer/data"
+import (
+	"github.com/kristenfelch/pkgindexer/data"
+	"github.com/kristenfelch/pkgindexer/logging"
+)
 
 // Remover is responsible for removing Libraries from the index.
 // It encapsulates the business logic behind removal and conditions required for removal,
@@ -12,16 +15,19 @@ type Remover interface {
 
 type SimpleRemover struct {
 	store data.IndexStore
+	logger logging.Logger
 }
 
 func (s *SimpleRemover) Remove(name string) (removed bool, err error) {
 	lib, libError := s.store.HasLibrary(name)
 	if libError != nil {
+		s.logger.Error(libError.Error())
 		return false, libError
 	}
 	if lib {
 		hasParents, hasParentsError := s.store.HasParents(name)
 		if hasParentsError != nil {
+			s.logger.Error(hasParentsError.Error())
 			return false, hasParentsError
 		}
 		if hasParents {
@@ -29,6 +35,7 @@ func (s *SimpleRemover) Remove(name string) (removed bool, err error) {
 		} else {
 			removed, removedErr := s.store.RemoveLibrary(name)
 			if removedErr != nil {
+				s.logger.Error(removedErr.Error())
 				return false, removedErr
 			}
 			return removed, nil
@@ -38,6 +45,10 @@ func (s *SimpleRemover) Remove(name string) (removed bool, err error) {
 	}
 }
 
-func NewRemover(store data.IndexStore) Remover {
-	return &SimpleRemover{store}
+// NewRemover creates a new Remover referencing our Index data store and logger.
+func NewRemover(store data.IndexStore, logger logging.Logger) Remover {
+	return &SimpleRemover{
+		store,
+		logger,
+	}
 }

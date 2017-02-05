@@ -6,7 +6,7 @@ import (
 	"github.com/kristenfelch/pkgindexer/operation"
 	"strings"
 	"flag"
-	"fmt"
+	"github.com/kristenfelch/pkgindexer/logging"
 )
 
 // IndexService is responsible for opening a Message Gateway and giving it a Channel
@@ -73,22 +73,26 @@ func (s *SimpleIndexService) ProcessMessage(input *input.ValidatedMessage) {
 	s.lock.Unlock()
 }
 
+// Main method reads input parameters throttle/logLevel, and starts up our service.
 func main() {
 	throttle := flag.Int("throttle", 0, "limit on max messages/second from each given")
+	logLevel := flag.String("logLevel", "INFO", "log level")
 	flag.Parse()
+	logger := logging.NewIndexLogger(logLevel)
+
 	if (*throttle > 10000) {
-		fmt.Println("Throttle must be less than 10000 requests/second, defaulting to MAX value")
+		logger.Debug("Throttle must be less than 10000 requests/second, defaulting to MAX value")
 		maxThrottle := 10000
 		throttle = &maxThrottle
 	}
 
-	var store = data.NewIndexStore()
+	var store = data.NewIndexStore(logger)
 	service := &SimpleIndexService{
-		operation.NewRemover(store),
-		operation.NewIndexer(store),
+		operation.NewRemover(store, logger),
+		operation.NewIndexer(store, logger),
 		operation.NewQuerier(store),
 		data.NewLock(),
-		input.NewMessageGateway(throttle),
+		input.NewMessageGateway(throttle, logger),
 	}
 	service.StartIndexing()
 }

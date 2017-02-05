@@ -1,4 +1,4 @@
-# Package Dependency Management Challenge : 0.1.6
+# Package Dependency Management Challenge : 0.1.7
 
 ## Features
 
@@ -11,6 +11,8 @@
 7. Dockerized service, and docker-compose.yml included up for easy local deployment.
 8. Simple custom logger that includes level (trace/info/error/debug)
 9. Documentation on all modules, to be generated using godoc.
+10. Integration tests that utilize test client from provided test harness.
+
 
 ## Building and Running
 
@@ -41,6 +43,35 @@ service at a capped rate.  Rate is given as an integer in messages per second pe
 
 <pre><code>go run main.go -throttle 1000</code></pre>
 
+## Testing
+Automated tests include unit, functional, and benchmark tests. Unit and functional tests can be
+run via the following from the main directory.
+
+<pre><code>go test ./...
+</code></pre>
+
+NOTE : Integration tests are meant to be end-to-end tests of expected behavior.
+Integration test module requires that a server be running on port 8080
+that can be connected to by clients for validation.  Unit tests can be run in isolation by running
+them from within each package using the same command.
+
+Output should resemble the following
+
+<pre>
+?   	github.com/kristenfelch/pkgindexer	[no test files]
+ok  	github.com/kristenfelch/pkgindexer/data	0.009s
+ok  	github.com/kristenfelch/pkgindexer/err	0.010s
+ok  	github.com/kristenfelch/pkgindexer/input	0.047s
+ok  	github.com/kristenfelch/pkgindexer/integration	0.050s
+?   	github.com/kristenfelch/pkgindexer/logging	[no test files]
+ok  	github.com/kristenfelch/pkgindexer/operation	0.010s
+</pre>
+
+In order to include benchmark tests, use the following command instead.
+
+<pre><code>go test ./... -bench=.
+</code></pre>
+
 ### Logging
 Log level can be set by using the logLevel parameter, which defaults to INFO.
 
@@ -54,12 +85,6 @@ To generate and view logs, use the godoc module as such, with port of your choic
 Then you will be able to navigate to the following link to view documentation.
 
 <pre><code>http://localhost:6060/pkg/github.com/kristenfelch/pkgindexer/</code></pre>
-
-## Future Plans
-
-- Automated integration testing in addition to unit tests that have been added, modeled after test harness.
-- Basic performance tests.
-- Basic linting for code consistency.
   
 ## Versions
 - 0.1.0 - Initial messy solution to pass test harness with low concurrency.
@@ -69,8 +94,22 @@ Then you will be able to navigate to the following link to view documentation.
 - 0.1.4 - Cleaning up and testing of business logic.
 - 0.1.5 - Custom error message type.
 - 0.1.6 - Simple custom logging interface, and documentation added to work with godoc.
+- 0.1.7 - Functional and benchmark tests
 
 ## Performance Notes
+
+### A Few Benchmarks
+
+One message of each type was chosen as a sampling of benchmark tests.  It is observable
+that error messages are returned faster than others as they fail validation and require no
+further processing.
+
+| Name  | Number of Runs  | Average Run Time  |
+|---|---|---|
+BenchmarkErrorMessages-8          	   30000	     38065 ns/op
+BenchmarkIndexMessage-8           	   20000	     63296 ns/op
+BenchmarkQueryMessage-8           	   20000	     59702 ns/op
+BenchmarkRemoveNonIndexedMessage-8	   20000	     59586 ns/op
 
 ### Request Throttling Comparisons
 
@@ -109,3 +148,9 @@ list while that library itself is being removed.
 3. The chosen implementation is the most 'transaction safe', and although it perhaps causes some unnecessary
 waiting (in the case where libraries being requested are not connected at all), it is a simple and clean
 implementation that seems to fit well for the widely-interconnected domain that we are working with.
+
+### Concurrency: Docker versus Local
+Running locally, it is easy to achieve concurrency at 100 clients.  When a docker image is spun up,
+either using docker-compose or not, for some reason the max concurrency that can be used is 32. 
+Open file limits and docker parameters have been investigated in attempts to solve this discrepancy,
+but no solution has yet been reached.

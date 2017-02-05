@@ -2,11 +2,13 @@ package data
 
 import (
 	"testing"
+	"github.com/kristenfelch/pkgindexer/logging"
 )
 
 // Tests simple addition of library to index.
 func TestAddLibrary(t *testing.T) {
-	store := NewIndexStore()
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
 	added, err := store.AddLibrary("library", []string{"dep1", "dep2"})
 	if (err != nil || !added) {
 		t.Errorf("Error encountered adding library : %s", err.Error())
@@ -15,7 +17,8 @@ func TestAddLibrary(t *testing.T) {
 
 // Tests adding of library and that new library is added to parents' lists of its dependencies.
 func TestAddLibraryToDependenciesParents(t *testing.T) {
-	store := NewIndexStore()
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
 	store.AddLibrary("dep1", nil)
 	store.AddLibrary("dep2", nil)
 
@@ -36,7 +39,8 @@ func TestAddLibraryToDependenciesParents(t *testing.T) {
 
 // Tests simple removal of a library that is already not indexed.
 func TestRemoveNonIndexedLibrary(t *testing.T) {
-	store := NewIndexStore()
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
 	removed, err := store.RemoveLibrary("dep1")
 	if (err != nil || !removed) {
 		t.Error("Remove should return with no error if library is not present")
@@ -45,7 +49,8 @@ func TestRemoveNonIndexedLibrary(t *testing.T) {
 
 // Tests that when library is removed, it is also removed from parents list of its dependencies.
 func TestRemoveIndexedWithDeps(t *testing.T) {
-	store := NewIndexStore()
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
 	store.AddLibrary("dep1", nil)
 	store.AddLibrary("library", []string{"dep1"})
 	//dependency should have library as a parent
@@ -66,7 +71,8 @@ func TestRemoveIndexedWithDeps(t *testing.T) {
 
 // Tests simple querying for library once it has been added.
 func TestHasLibrary(t *testing.T) {
-	store := NewIndexStore()
+	logLevel := "FATAL"
+	store := NewIndexStore(logging.NewIndexLogger(&logLevel))
 	exists, err := store.HasLibrary("library")
 	if (err != nil || exists) {
 		t.Error("Has Library should return false before library has been indexed")

@@ -1,6 +1,6 @@
-#  Package Dependency Management Challenge : 0.1.7
+# Package Dependency Management Challenge : 0.1.8
 
-##  Features
+## Features
 
 1. All Tests Passing with regard to test harness.
 2. Modularized solution with 4 packages : data/err/input/operation
@@ -13,34 +13,30 @@
 9. Documentation on all modules, to be generated using godoc.
 10. Integration and benchmark tests that utilize test client from provided test harness.
 
+## Building and Running
 
-##  Building and Running
-
-###  Local Host
+### Local Host
 
 <pre><code>go build
 go run main.go
 </code></pre>
 
-###Docker Compose
+### Docker Compose
 
 <pre><code>docker-compose build
 docker-compose up -d
 docker-compose logs -f
 </code></pre>
 
-
-###  Just Docker
+### Just Docker
 
 <pre><code>docker build -t pkgindexer .
 docker run -p 8080:8080 -d pkgindexer
 </code></pre>
 
+## Configuration
 
-##  Configuration
-
-
-###  Throttling
+### Throttling
 By setting the 'throttle' value, we can limit each client in its ability to send messages to our
 service at a capped rate.  Rate is given as an integer in messages per second per client.
 
@@ -50,16 +46,14 @@ NOTE: Throttling is better observed by using the docker setups, as the environme
 more reproducable than local environments.  See below Request Throttling Comparisons for some numbers
 that make sense.
 
-
-###  Logging
+### Logging
 Log level can be set by using the logLevel parameter, which defaults to INFO.
 
 <pre><code>go run main.go -logLevel TRACE</code></pre>
 
 NOTE: Too much intensive logging, TRACE/DEBUG, will likely cause undesirable performance under load.
 
-
-##  Testing
+## Testing
 Automated tests include unit, functional, and benchmark tests. Unit and functional tests can be
 run via the following from the main directory.
 
@@ -90,7 +84,7 @@ In order to include benchmark tests, use the following command instead.
 
 Similar to functional tests, server must be running on port 8080.
 
-##  Documentation
+## Documentation
 To generate and view logs, use the godoc module as such, with port of your choice:
 
 <pre><code>godoc -http=:6060</code></pre>
@@ -99,8 +93,7 @@ Then you will be able to navigate to the following link to view documentation.
 
 <pre><code>http://localhost:6060/pkg/github.com/kristenfelch/pkgindexer/</code></pre>
   
-
-##  Versions
+## Versions
 - 0.1.0 - Initial messy solution to pass test harness with low concurrency.
 - 0.1.1 - Modularized solution split out between packages.
 - 0.1.2 - Concurrency goals met for local run, optional throttling implemented.
@@ -110,11 +103,9 @@ Then you will be able to navigate to the following link to view documentation.
 - 0.1.6 - Simple custom logging interface, and documentation added to work with godoc.
 - 0.1.7 - Functional and benchmark tests
 
+## Performance Notes
 
-##  Performance Notes
-
-
-###  A Few Benchmarks
+### A Few Benchmarks
 
 One message of each type was chosen as a sampling of benchmark tests.  It is observable
 that error messages are returned faster than others as they fail validation and require no
@@ -127,8 +118,7 @@ further processing.
 | BenchmarkQueryMessage-8  | 20000  | 59702 ns/op  |
 | BenchmarkRemoveNonIndexedMessage-8  | 20000  | 59586 ns/op  |
 
-
-###  Request Throttling Comparisons
+### Request Throttling Comparisons
 
 * Utilizing the Docker image
 * Concurrency = 32
@@ -142,11 +132,9 @@ further processing.
 | 200 requests/client/second  | 11.2-12.4 seconds  |
 | 100 requests/client/second  | 24.1-24.9 seconds  |
 
+## Future Considerations
 
-##  Future Considerations
-
-
-###  Locking
+### Locking
 
 Currently, the entire in-memory cache representing the Index is locked for each request that comes in.
 This is done so that we do not have concurrency issues with reading/writing the same keys in the map,
@@ -168,8 +156,7 @@ list while that package itself is being removed.
 waiting (in the case where packages being requested are not connected at all), it is a simple and clean
 implementation that seems to fit well for the widely-interconnected domain that we are working with.
 
-
-###  Concurrency: Docker versus Local
+### Concurrency: Docker versus Local
 Running locally, it is easy to achieve concurrency at 100 clients.  When a docker image is spun up,
 either using docker-compose or not, for some reason the max concurrency that can be used is 32. 
 Open file limits and docker parameters have been investigated in attempts to solve this discrepancy,

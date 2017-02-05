@@ -17,22 +17,22 @@
 
 ### Local Host
 
-<pre><code>go build
+<pre>go build
 go run main.go
-</code></pre>
+</pre>
 
 ### Docker Compose
 
-<pre><code>docker-compose build
+<pre>docker-compose build
 docker-compose up -d
 docker-compose logs -f
-</code></pre>
+</pre>
 
 ### Just Docker
 
-<pre><code>docker build -t pkgindexer .
+<pre>docker build -t pkgindexer .
 docker run -p 8080:8080 -d pkgindexer
-</code></pre>
+</pre>
 
 ## Configuration
 
@@ -40,7 +40,7 @@ docker run -p 8080:8080 -d pkgindexer
 By setting the 'throttle' value, we can limit each client in its ability to send messages to our
 service at a capped rate.  Rate is given as an integer in messages per second per client.
 
-<pre><code>go run main.go -throttle 1000</code></pre>
+<pre>go run main.go -throttle 1000</pre>
 
 NOTE: Throttling is better observed by using the docker setups, as the environment is cleaner and
 more reproducable than local environments.  See below Request Throttling Comparisons for some numbers
@@ -49,7 +49,7 @@ that make sense.
 ### Logging
 Log level can be set by using the logLevel parameter, which defaults to INFO.
 
-<pre><code>go run main.go -logLevel TRACE</code></pre>
+<pre>go run main.go -logLevel TRACE</pre>
 
 NOTE: Too much intensive logging, TRACE/DEBUG, will likely cause undesirable performance under load.
 
@@ -57,7 +57,7 @@ NOTE: Too much intensive logging, TRACE/DEBUG, will likely cause undesirable per
 Automated tests include unit, functional, and benchmark tests. Unit and functional tests can be
 run via the following from the main directory.
 
-<pre><code>go test ./...</code></pre>
+<pre>go test ./...</pre>
 
 NOTE : Integration tests are meant to be end-to-end tests of expected behavior.
 Integration test module requires that a server be running on port 8080
@@ -78,19 +78,19 @@ ok  	github.com/kristenfelch/pkgindexer/operation	0.010s
 
 In order to include benchmark tests, use the following command instead.
 
-<pre><code>go test ./... -bench=.
-</code></pre>
+<pre>go test ./... -bench=.
+</pre>
 
 Similar to functional tests, server must be running on port 8080.
 
 ## Documentation
 To generate and view logs, use the godoc module as such, with port of your choice:
 
-<pre><code>godoc -http=:6060</code></pre>
+<pre>godoc -http=:6060</pre>
 
 Then you will be able to navigate to the following link to view documentation.
 
-<pre><code>http://localhost:6060/pkg/github.com/kristenfelch/pkgindexer/</code></pre>
+<pre>http://localhost:6060/pkg/github.com/kristenfelch/pkgindexer/</pre>
   
 ## Versions
 - 0.1.0 - Initial messy solution to pass test harness with low concurrency.

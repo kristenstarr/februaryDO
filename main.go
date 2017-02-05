@@ -82,11 +82,11 @@ func main() {
 		throttle = &maxThrottle
 	}
 
-	var libs = data.New()
+	var store = data.NewIndexStore()
 	service := &SimpleIndexService{
-		operation.NewRemover(libs),
-		operation.NewIndexer(libs),
-		operation.NewQuerier(libs),
+		operation.NewRemover(store),
+		operation.NewIndexer(store),
+		operation.NewQuerier(store),
 		data.NewLock(),
 		input.NewMessageGateway(throttle),
 	}

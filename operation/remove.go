@@ -3,7 +3,8 @@ package operation
 import "github.com/kristenfelch/pkgindexer/data"
 
 // Remover is responsible for removing Libraries from the index.
-// It encapsulates the business logic behind removal and conditions required for removal.
+// It encapsulates the business logic behind removal and conditions required for removal,
+// leaving removal itself to IndexStore.
 type Remover interface {
 	//removed indicates if element was removed, err if we tried and failed.
 	Remove(name string) (removed bool, err error)

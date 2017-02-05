@@ -18,16 +18,20 @@ type MessageGateway interface {
 	Close() (closed bool, err error)
 }
 
+// Simple Message Gateway is a MessageGateway that has an optional rate limit.
 type SimpleMessageGateway struct {
 	validator Validator
 	rate *int
 }
 
+// ValidatedMessage contains an input message as well as a channel created to receive the
+// result of processing this message.
 type ValidatedMessage struct {
 	*InputMessage
 	ResponseChannel chan<- string
 }
 
+// Open starts listening on a Port and accepting connections.
 func (s *SimpleMessageGateway) Open(c chan<- *ValidatedMessage) (opened bool, err error) {
 	ln, err := net.Listen("tcp", ":8080")
 	if err != nil {
@@ -43,10 +47,9 @@ func (s *SimpleMessageGateway) Open(c chan<- *ValidatedMessage) (opened bool, er
 	}
 }
 
+// handleConnection reads messages through the TCP connection, rate limiting if desired.
 func (s *SimpleMessageGateway) handleConnection(conn net.Conn, c chan<- *ValidatedMessage) {
-
 	throttler := NewThrottler(s.rate)
-
 	for {
 		throttler.Next()
 		message, msgError := bufio.NewReader(conn).ReadString('\n')
@@ -55,24 +58,31 @@ func (s *SimpleMessageGateway) handleConnection(conn net.Conn, c chan<- *Validat
 			throttler.Stop()
 			break;
 		}
-		validated, validatedError := s.validator.ValidateInput(message)
-		if validatedError != nil {
-			conn.Write(s.formatResponse("error"))
-		} else {
-			ch := make(chan string, 1)
-			validMessage := &ValidatedMessage{
-				validated,
-				ch,
-			}
-			c <- validMessage
-			returned := <-ch
-			close(ch)
-
-			conn.Write(s.formatResponse(returned))
-		}
+		s.handleMessage(conn, message, c)
 	}
 }
 
+// handleMessage validates our input message.  If it is valid, it is returned to the ValidatedMessage
+// channel with it's own length-1 channel to contain the final result of processing the message.
+func (s *SimpleMessageGateway) handleMessage(conn net.Conn, message string, c chan<- *ValidatedMessage) {
+	validated, validatedError := s.validator.ValidateInput(message)
+	if validatedError != nil {
+		conn.Write(s.formatResponse("error"))
+	} else {
+		ch := make(chan string, 1)
+		validMessage := &ValidatedMessage{
+			validated,
+			ch,
+		}
+		c <- validMessage
+		returned := <-ch
+		close(ch)
+
+		conn.Write(s.formatResponse(returned))
+	}
+}
+
+// formatResponse formats our generic 'ok', 'fail', and 'error' into format that clients receive.
 func (s *SimpleMessageGateway) formatResponse(str string) (resp []byte) {
 	switch str {
 	case "ok":

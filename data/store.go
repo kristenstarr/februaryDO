@@ -1,8 +1,6 @@
 package data
 
-import (
-	"errors"
-)
+import "github.com/kristenfelch/pkgindexer/err"
 
 // IndexStore is responsible for storing the current state of our index.
 // It encapsulates the lower level operations of adding, removing, and querying for
@@ -10,16 +8,16 @@ import (
 type IndexStore interface {
 
 	// Adds a Library to our Index.
-	AddLibrary(name string, deps []string) (added bool, err error)
+	AddLibrary(name string, deps []string) (added bool, error error)
 
 	// Removes a Library from our Index.
-	RemoveLibrary(name string) (removed bool, err error)
+	RemoveLibrary(name string) (removed bool, error error)
 
 	// Determines if Library has already been indexed.
-	HasLibrary(name string) (exists bool, err error)
+	HasLibrary(name string) (exists bool, error error)
 
 	// Determines if a Library has Parents - other libraries that depend on it.
-	HasParents(name string) (hasParents bool, err error)
+	HasParents(name string) (hasParents bool, error error)
 }
 
 type MapsIndexStore struct {
@@ -42,7 +40,7 @@ func (l *Library) HasParents() bool {
 	return len(l.Parents) > 0
 }
 
-func (m *MapsIndexStore) AddLibrary(name string, deps []string) (added bool, err error) {
+func (m *MapsIndexStore) AddLibrary(name string, deps []string) (added bool, error error) {
 	dependencies := make(map[string]bool, len(deps))
 	for v := range deps {
 		dependencies[deps[v]] = true
@@ -61,7 +59,7 @@ func (m *MapsIndexStore) AddLibrary(name string, deps []string) (added bool, err
 	return true, nil
 }
 
-func (m *MapsIndexStore) RemoveLibrary(name string) (removed bool, err error) {
+func (m *MapsIndexStore) RemoveLibrary(name string) (removed bool, error error) {
 	if lib, _ := m.getLibrary(name); lib != nil {
 		delete(m.store, name)
 		for key := range lib.Dependencies {
@@ -75,7 +73,7 @@ func (m *MapsIndexStore) RemoveLibrary(name string) (removed bool, err error) {
 	return true, nil
 }
 
-func (m *MapsIndexStore) getLibrary(name string) (lib *Library, err error) {
+func (m *MapsIndexStore) getLibrary(name string) (lib *Library, error error) {
 	if lib, ok := m.store[name]; ok {
 		return lib, nil
 	} else {
@@ -83,7 +81,7 @@ func (m *MapsIndexStore) getLibrary(name string) (lib *Library, err error) {
 	}
 }
 
-func (m *MapsIndexStore) HasLibrary(name string) (exists bool, err error) {
+func (m *MapsIndexStore) HasLibrary(name string) (exists bool, error error) {
 	if _, ok := m.store[name]; ok {
 		return true, nil
 	} else {
@@ -91,11 +89,11 @@ func (m *MapsIndexStore) HasLibrary(name string) (exists bool, err error) {
 	}
 }
 
-func (m *MapsIndexStore) HasParents(name string) (hasParents bool, err error) {
+func (m *MapsIndexStore) HasParents(name string) (hasParents bool, error error) {
 	if lib, _ := m.getLibrary(name); lib != nil {
 		return lib.HasParents(), nil
 	} else {
-		return false, errors.New("Unable to determined if Unindexed library has parents")
+		return false, err.NewIndexError("Unable to determined if Unindexed library has parents")
 	}
 }
 

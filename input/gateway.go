@@ -77,7 +77,6 @@ func (s *SimpleMessageGateway) handleMessage(conn net.Conn, message string, c ch
 		c <- validMessage
 		returned := <-ch
 		close(ch)
-
 		conn.Write(s.formatResponse(returned))
 	}
 }

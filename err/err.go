@@ -1,14 +1,25 @@
 package err
 
-// ErrorString is a custom Error type used throughout application.
-type ErrorString struct {
-	s string
+import (
+	"time"
+	"fmt"
+)
+
+// IndexError is a custom Error type used throughout application,
+// which includes a timestamp on all error messages.
+type IndexError struct {
+	msg string
+	time time.Time
 }
 
-func (e *ErrorString) Error() string {
-	return e.s
+func (e *IndexError) Error() string {
+	return fmt.Sprintf("%s : %s", e.msg, e.time.Format(time.UnixDate))
 }
 
-func New(text string) error {
-	return &ErrorString{text}
+// Creates a new IndexError including the current timestamp
+func NewIndexError(text string) error {
+	return &IndexError{
+		text,
+		time.Now(),
+	}
 }

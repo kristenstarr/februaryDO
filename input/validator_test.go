@@ -1,6 +1,10 @@
 package input
 
-import "testing"
+import (
+	"testing"
+	"strings"
+	"fmt"
+)
 
 // Tests correct Query message.
 func TestCorrectQuery(t *testing.T) {
@@ -32,7 +36,8 @@ func TestBadFormat(t *testing.T) {
 	validator := NewValidator()
 	badQuery := "NO_PIPES"
 	_, err := validator.ValidateInput(badQuery)
-	if (err.Error() != "Input does not have 3 arguments : NO_PIPES") {
+	fmt.Println(err.Error())
+	if (strings.Index(err.Error(), "Input does not have 3 arguments : NO_PIPES") != 0) {
 		t.Errorf("Incorrect error message : %s", err.Error())
 	}
 }
@@ -42,7 +47,7 @@ func TestBadVerb(t *testing.T) {
 	validator := NewValidator()
 	badQuery := "FAKE|lib|\n"
 	_, err := validator.ValidateInput(badQuery)
-	if (err.Error() != "Input method should be REMOVE/INDEX/QUERY, not : FAKE") {
+	if (strings.Index(err.Error(), "Input method should be REMOVE/INDEX/QUERY, not : FAKE") != 0) {
 		t.Errorf("Incorrect error message : %s", err.Error())
 	}
 }
@@ -52,7 +57,7 @@ func TestBadLibrary(t *testing.T) {
 	validator := NewValidator()
 	badQuery := "QUERY|l*ib|\n"
 	_, err := validator.ValidateInput(badQuery)
-	if (err.Error() != "Library name missing or incorrect : l*ib") {
+	if (strings.Index(err.Error(), "Library name missing or incorrect : l*ib") != 0) {
 		t.Errorf("Incorrect error message : %s", err.Error())
 	}
 }
@@ -62,7 +67,7 @@ func TestBadDependencies(t *testing.T) {
 	validator := NewValidator()
 	badQuery := "QUERY|lib|c&\n"
 	_, err := validator.ValidateInput(badQuery)
-	if (err.Error() != "Dependencies are incorrectly formatted : c&") {
+	if (strings.Index(err.Error(), "Dependencies are incorrectly formatted : c&") != 0) {
 		t.Errorf("Incorrect error message : %s", err.Error())
 	}
 }

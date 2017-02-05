@@ -5,7 +5,8 @@ import (
 )
 
 // Indexer is responsible for adding a Library to our Index.
-// It encapsulates business logic for knowing when a Library can be added.
+// It encapsulates business logic for knowing when a Library can be added,
+// leaving actual storage of index to IndexStore.
 type Indexer interface {
 	// indicates if element was Indexed, err if we tried and failed.
 	Index(name string, dependencies []string) (Indexed bool, err error)
@@ -40,8 +41,7 @@ func (s *SimpleIndexer) Index(name string, dependencies []string) (Indexed bool,
 
 	}
 
-	s.store.AddLibrary(name, dependencies)
-	return true, nil
+	return s.store.AddLibrary(name, dependencies)
 
 }
 

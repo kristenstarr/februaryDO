@@ -22,10 +22,7 @@
 go run main.go
 </code></pre>
 
-
-Running locally is simplest, but our environment is not necessarily reproducible or consistent.
-
-###  Docker Compose
+###Docker Compose
 
 <pre><code>docker-compose build
 docker-compose up -d

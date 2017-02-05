@@ -18,6 +18,7 @@ func (s *SimpleQuerier) Query(name string) (indexed bool, err error) {
 	return s.store.HasLibrary(name)
 }
 
+// NewQuerier creates a new Querier referencing our Index data store.
 func NewQuerier(store data.IndexStore) Querier {
 	return &SimpleQuerier{store}
 }

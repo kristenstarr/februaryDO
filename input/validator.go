@@ -55,6 +55,7 @@ func (s *SimpleValidator) ValidateInput(input string) (validMessage *InputMessag
 	}, nil
 }
 
+// NewValidator creates a new Validator for our input messages.
 func NewValidator() Validator {
 	return &SimpleValidator{}
 }

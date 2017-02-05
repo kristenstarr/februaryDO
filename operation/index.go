@@ -2,6 +2,7 @@ package operation
 
 import (
 	"github.com/kristenfelch/pkgindexer/data"
+	"github.com/kristenfelch/pkgindexer/logging"
 )
 
 // Indexer is responsible for adding a Library to our Index.
@@ -14,6 +15,7 @@ type Indexer interface {
 
 type SimpleIndexer struct {
 	store data.IndexStore
+	logger logging.Logger
 }
 
 func (s *SimpleIndexer) Index(name string, dependencies []string) (Indexed bool, err error) {
@@ -22,6 +24,7 @@ func (s *SimpleIndexer) Index(name string, dependencies []string) (Indexed bool,
 		lib, libError := s.store.HasLibrary(dep)
 		if libError != nil {
 			//error determining if dependency is there, for indexing
+			s.logger.Error(libError.Error())
 			return false, libError
 		}
 		if !lib {
@@ -33,6 +36,7 @@ func (s *SimpleIndexer) Index(name string, dependencies []string) (Indexed bool,
 	exists, existsErr := s.store.HasLibrary(name)
 	if existsErr != nil {
 		// error looking up existing indexed library
+		s.logger.Error(existsErr.Error())
 		return false, existsErr
 	}
 	if exists {
@@ -45,6 +49,10 @@ func (s *SimpleIndexer) Index(name string, dependencies []string) (Indexed bool,
 
 }
 
-func NewIndexer(store data.IndexStore) Indexer {
-	return &SimpleIndexer{store}
+// NewIndexer creates a new Indexer referencing our Index data store and a logger.
+func NewIndexer(store data.IndexStore, logger logging.Logger) Indexer {
+	return &SimpleIndexer{
+		store,
+		logger,
+	}
 }

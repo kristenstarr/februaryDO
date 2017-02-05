@@ -9,7 +9,8 @@
 5. Optional throttling of requests for rate limiting.
 6. Input validation utilizing Regex.
 7. Dockerized service, and docker-compose.yml included up for easy local deployment.
-
+8. Simple custom logger that includes level (trace/info/error/debug)
+9. Documentation all modules.
 
 ## Building and Running
 
@@ -31,6 +32,28 @@ docker-compose logs -f
 <pre><code>docker build -t pkgindexer .
 docker run -p 8080:8080 -d pkgindexer
 </code></pre>
+
+## Configuration
+
+### Throttling
+By setting the 'throttle' value, we can limit each client in its ability to send messages to our
+service at a capped rate.  Rate is given as an integer in messages per second per client.
+
+<pre><code>go run main.go -throttle 1000</code></pre>
+
+### Logging
+Log level can be set by using the logLevel parameter, which defaults to INFO.
+
+<pre><code>go run main.go -logLevel TRACE</code></pre>
+
+## Documentation
+To generate and view logs, use the godoc module as such, with port of your choice:
+
+<pre><code>godoc -http=:6060</code></pre>
+
+Then you will be able to navigate to the following link to view documentation.
+
+<pre><code>http://localhost:6060/pkg/github.com/kristenfelch/pkgindexer/</code></pre>
 
 ## Future Plans
 

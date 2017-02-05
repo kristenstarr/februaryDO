@@ -17,6 +17,7 @@ type Throttler interface {
 	Stop()
 }
 
+// SimpleThrottler is a Throttler with a Ticker and a boolean to indicate state.
 type SimpleThrottler struct{
 	ticker *time.Ticker
 	stopped bool
@@ -37,6 +38,7 @@ func (s *SimpleThrottler) Stop() {
 	}
 }
 
+// NewThrottler creates a new instance of a Throttler for our traffic, starting a time Ticker.
 func NewThrottler(rate *int) Throttler {
 	// We are implementing a throttle using a 'ticker' that adds a message to a channel at a set rate.
 	var ticker *time.Ticker

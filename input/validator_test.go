@@ -3,7 +3,6 @@ package input
 import (
 	"testing"
 	"strings"
-	"fmt"
 )
 
 // Tests correct Query message.
@@ -36,7 +35,6 @@ func TestBadFormat(t *testing.T) {
 	validator := NewValidator()
 	badQuery := "NO_PIPES"
 	_, err := validator.ValidateInput(badQuery)
-	fmt.Println(err.Error())
 	if (strings.Index(err.Error(), "Input does not have 3 arguments : NO_PIPES") != 0) {
 		t.Errorf("Incorrect error message : %s", err.Error())
 	}
